@@ -1,0 +1,12 @@
+streamlit>=1.28.0
+lightrag-hku
+numpy
+networkx
+openai
+tiktoken
+pypdf2
+python-docx
+python-pptx
+openpyxl
+pyvis
+matplotlib
