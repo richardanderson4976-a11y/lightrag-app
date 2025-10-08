@@ -58,6 +58,9 @@ def initialize_lightrag(api_key):
                 )
                 embeddings.append(response.data[0].embedding)
             return embeddings
+        
+        # Add embedding_dim attribute to the function
+        embed_func.embedding_dim = 768
 
         rag = LightRAG(
             working_dir=working_dir,
