@@ -23,13 +23,13 @@ def initialize_lightrag(api_key):
     """Initialize LightRAG with Gemini"""
     try:
         from lightrag import LightRAG
-        from lightrag.llm import openai_complete_if_cache, openai_embedding
+        from lightrag.llm.openai import openai_complete, openai_embedding
         
         working_dir = "./rag_storage"
         os.makedirs(working_dir, exist_ok=True)
         
         async def llm_func(prompt, system_prompt=None, history_messages=[], **kwargs):
-            return await openai_complete_if_cache(
+            return await openai_complete(
                 "gemini-2.0-flash-exp",
                 prompt,
                 system_prompt=system_prompt,
