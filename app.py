@@ -23,29 +23,41 @@ def initialize_lightrag(api_key):
     """Initialize LightRAG with Gemini"""
     try:
         from lightrag import LightRAG
-        from lightrag.llm.openai import openai_complete, openai_embedding
+        from openai import AsyncOpenAI
         
         working_dir = "./rag_storage"
         os.makedirs(working_dir, exist_ok=True)
         
+        # Create OpenAI client configured for Gemini
+        client = AsyncOpenAI(
+            api_key=api_key,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+        )
+        
         async def llm_func(prompt, system_prompt=None, history_messages=[], **kwargs):
-            return await openai_complete(
-                "gemini-2.0-flash-exp",
-                prompt,
-                system_prompt=system_prompt,
-                history_messages=history_messages,
-                api_key=api_key,
-                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            
+            messages.extend(history_messages)
+            messages.append({"role": "user", "content": prompt})
+            
+            response = await client.chat.completions.create(
+                model="gemini-2.0-flash-exp",
+                messages=messages,
                 **kwargs
             )
+            return response.choices[0].message.content
 
         async def embed_func(texts):
-            return await openai_embedding(
-                texts,
-                model="text-embedding-004",
-                api_key=api_key,
-                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-            )
+            embeddings = []
+            for text in texts:
+                response = await client.embeddings.create(
+                    model="text-embedding-004",
+                    input=text
+                )
+                embeddings.append(response.data[0].embedding)
+            return embeddings
 
         rag = LightRAG(
             working_dir=working_dir,
